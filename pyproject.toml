@@ -1,0 +1,10 @@
+[project]
+name = "dlt-demo"
+version = "0.0.1"
+description = "A demo project for testing DLT"
+authors = ["Viktor Herdinai"]
+
+[project.dependencies]
+
+[project.extras]
+dev = ["pytest", "pytest-cov", "flake8", "black", "isort", "mypy"]
