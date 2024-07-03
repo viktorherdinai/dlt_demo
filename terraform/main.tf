@@ -9,32 +9,14 @@ terraform {
 
 provider "aws" {}
 
-resource "aws_s3_bucket" "bucket" {
-  bucket = "databricks-bucket-${var.environment}"
+module "public_bucket"{
+  source = "./modules/public_bucket_aws"
+  bucket_name = "databricks-dlt-demo"
 }
 
-resource "aws_s3_bucket_ownership_controls" "control" {
-  bucket = aws_s3_bucket.bucket.id
-  rule {
-    object_ownership = "BucketOwnerPreferred"
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "block" {
-  bucket = aws_s3_bucket.bucket.id
-
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
-
-resource "aws_s3_bucket_acl" "bucket_acl" {
-  depends_on = [
-    aws_s3_bucket_ownership_controls.control,
-    aws_s3_bucket_public_access_block.block,
-  ]
-
-  bucket = aws_s3_bucket.bucket.id
+resource "aws_s3_object" "object" {
+  bucket = module.public_bucket.bucket_id
+  key    = "from_tf.json"
+  source = "../mock_data/workers2.json"
   acl    = "public-read"
 }
