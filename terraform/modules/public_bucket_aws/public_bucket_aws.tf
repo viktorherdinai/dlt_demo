@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "bucket" {
   bucket = "${var.bucket_name}-${var.environment}"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_ownership_controls" "control" {
