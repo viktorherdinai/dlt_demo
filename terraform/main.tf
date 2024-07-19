@@ -7,16 +7,19 @@ terraform {
   }
 }
 
-provider "aws" {}
+provider "aws" {
+  region = "eu-central-1"
+}
 
-module "public_bucket"{
-  source = "./modules/public_bucket_aws"
+module "public_bucket" {
+  source      = "./modules/public_bucket_aws"
   bucket_name = "databricks-dlt-demo"
 }
 
 resource "aws_s3_object" "object" {
+  depends_on = [module.public_bucket]
   bucket = module.public_bucket.bucket_id
-  key    = "from_tf.json"
-  source = "../mock_data/workers2.json"
+  key    = "schemas/worker_schema_v1.json"
+  source = "../schemas/worker_schema_v1.json"
   acl    = "public-read"
 }
