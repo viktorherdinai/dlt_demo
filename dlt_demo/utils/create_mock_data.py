@@ -60,15 +60,16 @@ def create_file_like_object(json_str: str) -> io.BytesIO:
     return io.BytesIO(json_str)
 
 
-def stream_mock_data(*, delay: int) -> None:
+def stream_mock_data(*, delay: int, position_changing=True) -> None:
     """Stream mock data to S3 bucket.
 
     Args:
         delay (int): Delay between each upload in seconds.
+        position_changing (bool): Whether to add a new field to the JSON object.
     """
     uploaded_files = 0
     while True:
-        worker_obj = create_file_like_object(create_worker(new_field=True))
+        worker_obj = create_file_like_object(create_worker(new_field=position_changing))
         upload_to_bucket(worker_obj, "databricks-dlt-demo-dev", f"mock_data/worker-{int(time.time())}.json")
         uploaded_files += 1
         logger.info(f"[{uploaded_files}] - Uploaded mock data to S3.")
