@@ -1,46 +1,9 @@
 # Databricks notebook source
-# DBTITLE 1,Bronze table
+# DBTITLE 1,Temporary Quarantine Table
 import dlt
 import pyspark.sql.functions as f
 
 from pyspark.sql.functions import when
-
-s3_bucket_root = spark.conf.get("s3_bucket_root")
-schema_location = spark.conf.get("schema_location")
-
-@dlt.table(
-    table_properties={
-        "quality": "bronze",
-        "pipelines.reset.allowed": "false"
-    }
-)
-def bronze_worker():
-    """
-    Bronze table containing raw data.
-    If data with new column comes the pipeline will fail and restart with the evolved schema.
-    """
-    df = (
-        spark.readStream.format("cloudFiles")
-                .option("cloudFiles.format", "json")
-                .option("cloudFiles.schemaLocation", schema_location)
-                .option("cloudFiles.schemaEvolutionMode", "addNewColumns")
-                .option("multiline", True)
-                .load(f"{s3_bucket_root}/mock_data/")
-                .withColumn("file_name", f.input_file_name())
-                .withColumn("current_timestamp", f.current_timestamp())
-    )
-
-    if "gender" not in df.columns:
-        df = df.withColumn("gender", f.lit(None).cast("string"))
-
-    return df
-
-
-
-
-# COMMAND ----------
-
-# DBTITLE 1,Temporary Quarantine Table
 
 rules = {
     "valid_bonus": "bonus > 200",
@@ -72,8 +35,6 @@ def temp_worker():
 # COMMAND ----------
 
 # DBTITLE 1,Silver table
-
-
 @dlt.table(
     table_properties={
         "quality": "silver",
@@ -141,19 +102,6 @@ dlt.apply_changes(
 
 # COMMAND ----------
 
-# DBTITLE 1,Check Unique PK ~ Alert
-@dlt.table
-@dlt.expect_or_fail("unique_pk", "unique_count = 1")
-def check_unique_pk():
-    """Table that checks if the primary key is unique. If the key is not unique the pipeline fails."""
-    return (
-        dlt.read("silver_worker")
-         .groupBy("worker_id")
-         .agg(f.countDistinct("worker_name").alias("unique_count"))
-    )
-
-# COMMAND ----------
-
 # DBTITLE 1,Split Male/Female/Other
 # Multiplex source: https://www.databricks.com/blog/2022/04/27/how-uplift-built-cdc-and-multiplexing-data-pipelines-with-databricks-delta-live-tables.html
 from collections import namedtuple
@@ -188,11 +136,11 @@ for config in table_configs:
 
 # COMMAND ----------
 
-# DBTITLE 1,Demultiplex Data
+# DBTITLE 1,Multiplex Data
 from functools import reduce
 
 @dlt.table
-def demultiplexed_workers():
+def multiplexed_workers():
     """Table that combines the filtered data from the 'female_workers', 'male_workers', and 'other_workers' tables.
     Only includes rows where the salary is greater than 8000.
     """
@@ -210,9 +158,9 @@ def demultiplexed_workers():
     }
 )
 def salary_by_gender():
-    """Table that calculates the average salary by gender from the 'demultiplexed_workers' table."""
+    """Table that calculates the average salary by gender from the 'multiplexed_workers' table."""
     return (
-        dlt.read("demultiplexed_workers")
+        dlt.read("multiplexed_workers")
          .groupBy("gender")
          .agg(f.avg("salary").alias("average_salary"))
     )
@@ -226,9 +174,9 @@ def salary_by_gender():
     }
 )
 def total_bonus_by_worker():
-    """Table that calculates the total bonus by worker from the 'demultiplexed_workers' table."""
+    """Table that calculates the total bonus by worker from the 'multiplexed_workers' table."""
     return (
-        dlt.read("demultiplexed_workers")
+        dlt.read("multiplexed_workers")
          .groupBy("worker_name")
          .agg(f.sum("bonus").alias("total_bonus"))
     )
