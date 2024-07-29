@@ -1,0 +1,64 @@
+# Useful docs:
+# https://learn.microsoft.com/en-us/azure/databricks/dev-tools/bundles/settings
+# https://docs.databricks.com/api/workspace/pipelines/update
+bundle:
+  name: dlt_demo
+
+workspace:
+  host: "{{ env["DATABRICKS_HOST_NAME"] }}"
+
+sync:
+  exclude:
+    - terraform
+
+resources:
+  pipelines:
+    dlt_demo_pipeline:
+      name: "[${bundle.environment}] - dlt_demo_pipeline"
+      target: "dlt_demo_${bundle.environment}"
+      libraries:
+        - notebook:
+            path: dlt_demo/transformations/dlt_demo.py
+      configuration:
+        bundle.filePath: /Workspace${workspace.file_path}
+        schema_location: /Workspace${workspace.file_path}/${bundle.environment}
+      continuous: false
+      development: true
+      clusters:
+        - autoscale:
+            min_workers: 1
+            max_workers: 1
+
+targets:
+  DEV:
+    default: true
+    resources:
+      pipelines:
+        dlt_demo_pipeline:
+          libraries:
+            - notebook:
+                path: dlt_demo/ingestion/worker_bronze.py
+          configuration:
+            s3_bucket_root: {{ env["S3_BUCKET_URI_DEV"] }}
+  PRD:
+    resources:
+      pipelines:
+        dlt_demo_pipeline:
+          libraries:
+            - notebook:
+                path: dlt_demo/ingestion/worker_bronze.py
+          configuration:
+            s3_bucket_root: {{ env["S3_BUCKET_URI_PRD"] }}
+          development: false
+          clusters:
+            - autoscale:
+                min_workers: 2
+                max_workers: 2
+
+  TEST:
+    resources:
+      pipelines:
+        dlt_demo_pipeline:
+          libraries:
+            - notebook:
+                path: dlt_demo/tests/dlt_tests.py
