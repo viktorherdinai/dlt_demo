@@ -7,6 +7,10 @@ terraform {
   }
 }
 
+locals {
+  env = terraform.workspace
+}
+
 provider "aws" {
   region = "eu-central-1"
 }
@@ -14,6 +18,7 @@ provider "aws" {
 module "public_bucket" {
   source      = "./modules/public_bucket_aws"
   bucket_name = "databricks-dlt-demo"
+  environment = local.env
 }
 
 resource "aws_s3_object" "object" {
