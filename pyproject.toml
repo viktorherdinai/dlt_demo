@@ -2,7 +2,7 @@
 name = "dlt-demo"
 version = "0.0.1"
 description = "A demo project for testing DLT"
-authors = ["Viktor Herdinai"]
+authors = [{name = "Viktor Herdinai"}]
 
 dependencies = [
     'boto3 ~= 1.34.138',
@@ -10,5 +10,8 @@ dependencies = [
     'python-dotenv ~= 1.0.1',
 ]
 
-[project.extras]
+[project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "flake8", "black", "isort", "mypy"]
+
+[tool.setuptools.packages.find]
+where = ["dlt_demo"]
