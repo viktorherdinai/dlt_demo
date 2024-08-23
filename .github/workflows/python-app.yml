@@ -14,7 +14,7 @@ permissions:
 
 env:
   DATABRICKS_HOST_NAME: "${{ secrets.DATABRICKS_HOST_NAME }}"
-  hi: "${{ secrets.HELLO }}
+  hi: "${{ secrets.HELLO }}"
 
 jobs:
   deploy_test:
