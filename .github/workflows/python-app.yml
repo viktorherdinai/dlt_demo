@@ -3,6 +3,8 @@
 
 name: DLT demo cicd pipeline
 
+concurrency: "1"
+
 on:
   push:
     branches: [ "main" ]
@@ -10,9 +12,13 @@ on:
 permissions:
   contents: read
 
-jobs:
-  build:
+env:
+  DATABRICKS_HOST_NAME: "${{ secrets.DATABRICKS_HOST_NAME }}"
+  hi: "${{ secrets.HELLO }}
 
+jobs:
+  deploy_test:
+    name: "Deploy test DLT pipeline"
     runs-on: ubuntu-latest
 
     steps:
@@ -21,13 +27,29 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
-    - name: install-databricks-cli
-      run: |
-        curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+    - name: Install Databricks CLI 
+      uses: databricks/setup-cli@main
     - name: Check something
       run: |
         echo "Hey from gh actions"
         databricks --version
-        echo "${{ secrets.HELLO }}"
+        echo "$HELLO"
+    - name: Create DAB file
+      run: |
+        python3 --version
+        python --version
+      
+
+    # Download the Databricks CLI.
+    # See https://github.com/databricks/setup-cli
+    
+
+    # Deploy the bundle to the "prod" target as defined
+    # # in the bundle's settings file.
+    # - run: databricks bundle deploy
+    #   working-directory: .
+    #   env:
+    #     DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
+    #     DATABRICKS_BUNDLE_ENV: TEST
           
     
