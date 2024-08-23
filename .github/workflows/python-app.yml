@@ -22,7 +22,8 @@ jobs:
       with:
         python-version: "3.11"
     - name: install-databricks-cli
-      uses: microsoft/install-databricks-cli@v1.0.0
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
     - name: Check something
       run: |
         echo "Hey from gh actions"
