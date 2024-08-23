@@ -52,7 +52,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
-      - run: databricks bundle run my-job --refresh-all
+      - run: |
+          pwd
+          ls
+          if [ -f databricks.yaml ]; then cat databricks.yaml; fi
+      - run: databricks bundle run "[TEST] - dlt_demo_pipeline" --refresh-all
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: TEST
