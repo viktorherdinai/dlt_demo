@@ -35,6 +35,7 @@ jobs:
         databricks --version
         echo "$hi"
     - name: Create DAB file
+      working-directory: ./dlt_demo
       run: |
         pwd
         ls -la
