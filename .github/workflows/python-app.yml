@@ -13,8 +13,7 @@ permissions:
   contents: read
 
 env:
-  # DATABRICKS_HOST_NAME: "${{ secrets.DATABRICKS_HOST_NAME }}"
-  DATABRICKS_HOST_NAME: "test_value"
+  DATABRICKS_HOST_NAME: "${{ secrets.DATABRICKS_HOST_NAME }}"
   hi: "${{ secrets.HELLO }}"
 
 jobs:
@@ -24,27 +23,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
+        
     - name: Install dependencies
       run: pip install .
     - name: Install Databricks CLI 
       uses: databricks/setup-cli@main
-    - name: Check something
-      run: |
-        echo "Hey from gh actions"
-        databricks --version
-        echo "$hi"
+      
     - name: Create DAB file
       working-directory: ./dlt_demo/utils
-      run: |
-        pwd
-        ls -la
-        python create_dab_yaml.py
-    - name: Check created file
-      run: cat databricks.yaml
+      run: python create_dab_yaml.py
+
+    - run: databricks bundle deploy
+      env:
+        DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
+        DATABRICKS_BUNDLE_ENV: TEST
       
 
     # Download the Databricks CLI.
