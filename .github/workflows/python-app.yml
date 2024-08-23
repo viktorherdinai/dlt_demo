@@ -51,28 +51,26 @@ jobs:
       - deploy_test
     steps:
       - uses: actions/checkout@v4
-      - uses: databricks/setup-cli@main
-      - run: |
-          pwd
-          ls
-          if [ -f databricks.yaml ]; then cat databricks.yaml; fi
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.11"
+        
+      - name: Install dependencies
+        run: pip install .
+      - name: Install Databricks CLI 
+        uses: databricks/setup-cli@main
+        
+      - name: Create DAB file
+        working-directory: ./dlt_demo/utils
+        run: python create_dab_yaml.py
+        
       - run: databricks bundle run "[TEST] - dlt_demo_pipeline" --refresh-all
+        name: "Run test pipeline"
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: TEST
+
   
-      
-
-    # Download the Databricks CLI.
-    # See https://github.com/databricks/setup-cli
-    
-
-    # Deploy the bundle to the "prod" target as defined
-    # # in the bundle's settings file.
-    # - run: databricks bundle deploy
-    #   working-directory: .
-    #   env:
-    #     DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
-    #     DATABRICKS_BUNDLE_ENV: TEST
           
     
