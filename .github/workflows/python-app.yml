@@ -33,9 +33,11 @@ jobs:
       run: |
         echo "Hey from gh actions"
         databricks --version
-        echo "$HELLO"
+        echo "$hi"
     - name: Create DAB file
       run: |
+        pwd
+        ls -la
         python3 --version
         python --version
       
