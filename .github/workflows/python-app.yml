@@ -13,7 +13,8 @@ permissions:
   contents: read
 
 env:
-  DATABRICKS_HOST_NAME: "${{ secrets.DATABRICKS_HOST_NAME }}"
+  # DATABRICKS_HOST_NAME: "${{ secrets.DATABRICKS_HOST_NAME }}"
+  DATABRICKS_HOST_NAME: "test_value"
   hi: "${{ secrets.HELLO }}"
 
 jobs:
@@ -35,12 +36,13 @@ jobs:
         databricks --version
         echo "$hi"
     - name: Create DAB file
-      working-directory: ./dlt_demo
+      working-directory: ./dlt_demo/utils
       run: |
         pwd
         ls -la
-        python3 --version
-        python --version
+        python create_dab_yaml.py
+    - name: Check created file
+      run: cat databricks.yaml
       
 
     # Download the Databricks CLI.
