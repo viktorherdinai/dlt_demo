@@ -65,7 +65,7 @@ jobs:
         working-directory: ./dlt_demo/utils
         run: python create_dab_yaml.py
         
-      - run: databricks bundle run dlt_demo_pipeline --refresh-all --refresh-mode full
+      - run: databricks bundle run dlt_demo_pipeline --full-refresh-all
         name: "Run test pipeline"
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
